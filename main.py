@@ -7,11 +7,9 @@ scheduler = Scheduler()
 def task():
     print("Tarefa bonita")
 
+scheduler.time = '00:36'
 
-scheduler.date = '10/05/2022'
-scheduler.time = '10:21'
-
-scheduler.specific_date(task)
+scheduler.every_day(task)
 
 
 scheduler.run()
