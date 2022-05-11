@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import sched
 import time
 from typing import Callable
@@ -41,7 +41,33 @@ class Scheduler(object):
 
         horary = datetime.combine(self.__date, self.__time)
         self.__scheduler.enterabs(horary.timestamp(), priority, action, argument=argument, kwargs=kwargs)
+    
+    def every_day(self, action, priority=PRIORITY_HIGH, argument=(), kwargs={}):
+        """Method that executes the action every day in the specific time
 
+        Args:
+            action (Callable): task to be performed 
+            priority (int, optional): Priority level of execution. Defaults to PRIORITY_HIGH.
+            argument (tuple, optional): arguments from action callable. Defaults to ().
+            kwargs (dict, optional): key arguments from action callable. Defaults to {}.
+        """
+
+        def reschedule(horary, *argument, **kwargs):
+            horary += timedelta(days=1)
+            print(f"{horary}")
+            action(*argument, **kwargs)
+
+            self.__scheduler.enterabs(horary.timestamp(), priority, reschedule, argument=argument, kwargs=kwargs)
+
+        
+        horary = datetime.combine(datetime.now(), self.__time)
+        if horary.timestamp() < datetime.now().timestamp():
+                horary += timedelta(days=1)
+        
+        argument =  horary, *argument
+        print(f"{horary}")
+
+        self.__scheduler.enterabs(horary.timestamp(), priority, reschedule, argument=argument, kwargs=kwargs)
 
     def run(self):
         self.__scheduler.run(blocking=True)
